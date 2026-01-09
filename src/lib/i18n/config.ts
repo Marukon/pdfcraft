@@ -3,7 +3,7 @@
  * Defines supported locales and routing configuration
  */
 
-export const locales = ['en', 'ja', 'ko', 'es', 'fr', 'de', 'zh', 'pt'] as const;
+export const locales = ['en', 'zh'] as const;
 export type Locale = (typeof locales)[number];
 
 export const defaultLocale: Locale = 'zh';

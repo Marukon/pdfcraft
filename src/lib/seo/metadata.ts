@@ -238,13 +238,7 @@ export function generatePrivacyMetadata(locale: Locale): Metadata {
 export function getOpenGraphLocale(locale: Locale): string {
   const ogLocaleMap: Record<Locale, string> = {
     en: 'en_US',
-    ja: 'ja_JP',
-    ko: 'ko_KR',
-    es: 'es_ES',
-    fr: 'fr_FR',
-    de: 'de_DE',
     zh: 'zh_CN',
-    pt: 'pt_BR',
   };
   return ogLocaleMap[locale] || 'en_US';
 }

@@ -232,13 +232,7 @@ export function generateWebPageSchema(
 ): WebPageSchema {
   const languageMap: Record<Locale, string> = {
     en: 'en-US',
-    ja: 'ja-JP',
-    ko: 'ko-KR',
-    es: 'es-ES',
-    fr: 'fr-FR',
-    de: 'de-DE',
     zh: 'zh-CN',
-    pt: 'pt-BR',
   };
 
   return {

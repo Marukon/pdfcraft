@@ -9,7 +9,10 @@ import { SkipLink } from '@/components/common/SkipLink';
 import '@/app/globals.css';
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return [
+    { locale: 'zh' },
+    { locale: 'en' },
+  ];
 }
 
 /**

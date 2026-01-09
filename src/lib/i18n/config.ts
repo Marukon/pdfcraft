@@ -6,7 +6,7 @@
 export const locales = ['en', 'ja', 'ko', 'es', 'fr', 'de', 'zh', 'pt'] as const;
 export type Locale = (typeof locales)[number];
 
-export const defaultLocale: Locale = 'en';
+export const defaultLocale: Locale = 'zh';
 
 export const localeConfig: Record<Locale, {
   name: string;
@@ -15,13 +15,7 @@ export const localeConfig: Record<Locale, {
   dateFormat: string;
 }> = {
   en: { name: 'English', nativeName: 'English', direction: 'ltr', dateFormat: 'MM/DD/YYYY' },
-  ja: { name: 'Japanese', nativeName: '日本語', direction: 'ltr', dateFormat: 'YYYY/MM/DD' },
-  ko: { name: 'Korean', nativeName: '한국어', direction: 'ltr', dateFormat: 'YYYY.MM.DD' },
-  es: { name: 'Spanish', nativeName: 'Español', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },
-  fr: { name: 'French', nativeName: 'Français', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },
-  de: { name: 'German', nativeName: 'Deutsch', direction: 'ltr', dateFormat: 'DD.MM.YYYY' },
   zh: { name: 'Chinese', nativeName: '中文', direction: 'ltr', dateFormat: 'YYYY-MM-DD' },
-  pt: { name: 'Portuguese', nativeName: 'Português', direction: 'ltr', dateFormat: 'DD/MM/YYYY' },
 };
 
 /**

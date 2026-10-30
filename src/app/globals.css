@@ -80,6 +80,7 @@
 
 /* Dark Mode Theme */
 .dark {
+  color-scheme: dark;
   --color-primary: 226 71% 60%;
   --color-primary-foreground: 222 47% 11%;
   --color-primary-hover: 226 71% 70%;
@@ -116,6 +117,17 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base Styles for Form Elements */
+select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}
+
+select option {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
 }
 
 /* Utility Classes using CSS Variables */
@@ -267,6 +279,21 @@ body {
 [dir="rtl"] .rtl\:flip { transform: scaleX(-1); }
 [dir="rtl"] .me-2 { margin-inline-end: 0.5rem; }
 [dir="rtl"] .ms-2 { margin-inline-start: 0.5rem; }
+
+/* Arabic and Hebrew (RTL) Language Support */
+/* Arabic uses the self-hosted Noto Sans Arabic webfont (src/lib/fonts.ts); the */
+/* rest of the stack keeps native Arabic/Hebrew system fonts as fallbacks. */
+[lang="he"], [lang="ar"] {
+  font-family: var(--font-arabic, 'Noto Sans Arabic'), 'Segoe UI', 'Geeza Pro', 'Al Nile',
+    'Damascus', 'Noto Naskh Arabic', 'Arial Unicode MS', Arial, Helvetica, sans-serif;
+  direction: rtl;
+}
+
+/* Ensure Arabic/Hebrew text layers render even when the PDF font lacks the glyphs */
+.textLayer[dir="rtl"] span {
+  font-family: var(--font-arabic, 'Noto Sans Arabic'), 'Segoe UI', 'Geeza Pro', 'Al Nile',
+    'Noto Naskh Arabic', 'Arial Unicode MS', Arial, sans-serif;
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

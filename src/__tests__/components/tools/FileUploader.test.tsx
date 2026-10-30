@@ -2,6 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FileUploader } from '@/components/tools/FileUploader';
+import { PDFDocument } from 'pdf-lib';
+import { decryptPDF } from '@/lib/pdf/processors/decrypt';
+
+vi.mock('pdf-lib', () => ({
+  PDFDocument: {
+    load: vi.fn(),
+  },
+}));
+
+vi.mock('@/lib/pdf/processors/decrypt', () => ({
+  decryptPDF: vi.fn(),
+}));
 
 // Mock next-intl
 vi.mock('next-intl', () => ({
@@ -9,6 +21,10 @@ vi.mock('next-intl', () => ({
     const translations: Record<string, string> = {
       'buttons.upload': 'Upload Files',
       'buttons.cancel': 'Cancel',
+      'fileUploader.dragDrop': 'Drag and drop files here, or click to browse',
+      'fileUploader.dropToUpload': 'Drop files here',
+      'fileUploader.support': 'Support',
+      'fileUploader.paste': 'Paste (Ctrl+V)',
     };
     if (key === 'fileTooLarge') {
       return `File size exceeds ${params?.maxSize}MB limit`;
@@ -59,6 +75,8 @@ describe('FileUploader', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(PDFDocument.load).mockResolvedValue({} as any);
+    vi.mocked(decryptPDF).mockResolvedValue({ success: false });
   });
 
   describe('Rendering', () => {
@@ -179,7 +197,9 @@ describe('FileUploader', () => {
       
       fireEvent.change(fileInput);
       
-      expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFile]);
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFile]);
+      });
     });
   });
 
@@ -210,7 +230,7 @@ describe('FileUploader', () => {
       expect(screen.queryByText('Drop files here')).not.toBeInTheDocument();
     });
 
-    it('handles file drop', () => {
+    it('handles file drop', async () => {
       render(<FileUploader onFilesSelected={mockOnFilesSelected} />);
       
       const dropZone = screen.getByRole('button', { name: /upload/i });
@@ -219,10 +239,12 @@ describe('FileUploader', () => {
       
       fireEvent.drop(dropZone, { dataTransfer });
       
-      expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFile]);
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFile]);
+      });
     });
 
-    it('handles multiple file drop when multiple is enabled', () => {
+    it('handles multiple file drop when multiple is enabled', async () => {
       render(
         <FileUploader 
           onFilesSelected={mockOnFilesSelected}
@@ -239,7 +261,9 @@ describe('FileUploader', () => {
       
       fireEvent.drop(dropZone, { dataTransfer });
       
-      expect(mockOnFilesSelected).toHaveBeenCalledWith(mockFiles);
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalledWith(mockFiles);
+      });
     });
   });
 
@@ -282,7 +306,7 @@ describe('FileUploader', () => {
       expect(mockOnFilesSelected).not.toHaveBeenCalled();
     });
 
-    it('accepts files with .pdf extension even without MIME type', () => {
+    it('accepts files with .pdf extension even without MIME type', async () => {
       render(
         <FileUploader 
           onFilesSelected={mockOnFilesSelected}
@@ -298,10 +322,12 @@ describe('FileUploader', () => {
       
       fireEvent.drop(dropZone, { dataTransfer });
       
-      expect(mockOnFilesSelected).toHaveBeenCalledWith([pdfFile]);
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([pdfFile]);
+      });
     });
 
-    it('limits files to maxFiles when multiple is enabled', () => {
+    it('limits files to maxFiles when multiple is enabled', async () => {
       render(
         <FileUploader 
           onFilesSelected={mockOnFilesSelected}
@@ -321,12 +347,13 @@ describe('FileUploader', () => {
       
       fireEvent.drop(dropZone, { dataTransfer });
       
-      expect(mockOnError).toHaveBeenCalled();
-      // Should still call with first 2 files
-      expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFiles[0], mockFiles[1]]);
+      await waitFor(() => {
+        expect(mockOnError).toHaveBeenCalled();
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFiles[0], mockFiles[1]]);
+      });
     });
 
-    it('only accepts first file when multiple is disabled', () => {
+    it('only accepts first file when multiple is disabled', async () => {
       render(
         <FileUploader 
           onFilesSelected={mockOnFilesSelected}
@@ -344,7 +371,9 @@ describe('FileUploader', () => {
       
       fireEvent.drop(dropZone, { dataTransfer });
       
-      expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFiles[0]]);
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([mockFiles[0]]);
+      });
     });
   });
 
@@ -429,6 +458,77 @@ describe('FileUploader', () => {
       
       const fileInput = document.querySelector('input[type="file"]');
       expect(fileInput).toHaveAttribute('aria-hidden', 'true');
+    });
+  });
+
+  describe('Encryption and Silent Unlocking', () => {
+    it('silently unlocks PDFs that only have owner restrictions (e.g. bank statements)', async () => {
+      vi.mocked(PDFDocument.load).mockRejectedValue(
+        new Error('Input document to load is encrypted. You must provide a password to decrypt it.')
+      );
+
+      const mockUnlockedBlob = new Blob(['unlocked content'], { type: 'application/pdf' });
+      vi.mocked(decryptPDF).mockResolvedValue({
+        success: true,
+        result: mockUnlockedBlob,
+      });
+
+      render(<FileUploader onFilesSelected={mockOnFilesSelected} />);
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      const bankStatement = new File(['%PDF-1.4 restricted'], 'bank_statement.pdf', {
+        type: 'application/pdf',
+      });
+
+      Object.defineProperty(fileInput, 'files', {
+        value: [bankStatement],
+        writable: true,
+      });
+      fireEvent.change(fileInput);
+
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalled();
+      });
+
+      expect(PDFDocument.load).toHaveBeenCalled();
+      expect(decryptPDF).toHaveBeenCalled();
+
+      const calledFiles = mockOnFilesSelected.mock.calls[0][0];
+      expect(calledFiles).toHaveLength(1);
+      expect(calledFiles[0].name).toBe('bank_statement.pdf');
+      expect(screen.queryByText(/This Document is Encrypted/i)).not.toBeInTheDocument();
+    });
+
+    it('prompts password modal when silent unlock fails (true user password protected)', async () => {
+      vi.mocked(PDFDocument.load).mockRejectedValue(
+        new Error('Input document to load is encrypted. You must provide a password to decrypt it.')
+      );
+
+      vi.mocked(decryptPDF).mockResolvedValue({
+        success: false,
+        error: { code: 'PDF_ENCRYPTED', message: 'INVALID_PASSWORD' } as any,
+      });
+
+      render(<FileUploader onFilesSelected={mockOnFilesSelected} />);
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+
+      const securePdf = new File(['%PDF-1.4 locked'], 'confidential.pdf', {
+        type: 'application/pdf',
+      });
+
+      Object.defineProperty(fileInput, 'files', {
+        value: [securePdf],
+        writable: true,
+      });
+      fireEvent.change(fileInput);
+
+      await waitFor(() => {
+        const passInput = document.querySelector('input[type="password"]');
+        expect(passInput).not.toBeNull();
+      });
+
+      // Files should not be selected yet
+      expect(mockOnFilesSelected).not.toHaveBeenCalled();
     });
   });
 });

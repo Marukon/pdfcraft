@@ -1,16 +1,51 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
+function resolveAppVersion() {
+  if (process.env.APP_VERSION) return process.env.APP_VERSION;
+  if (process.env.NEXT_PUBLIC_APP_VERSION) return process.env.NEXT_PUBLIC_APP_VERSION;
+
+  try {
+    const gitHash = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+    const commitDate = execSync('git log -1 --format=%cd --date=format:%Y.%m.%d', { stdio: ['ignore', 'pipe', 'ignore'] })
+      .toString()
+      .trim();
+    if (gitHash && commitDate) {
+      return `v${commitDate}-${gitHash}`;
+    }
+  } catch {
+    // Git not available or not a git repository
+  }
+
+  return process.env.npm_package_version || '0.1.0';
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable static export for deployment flexibility
   output: 'export',
+  
+  // Support deployment under a subpath (e.g., /pdfcraft/)
+  // Use BASE_PATH or NEXT_PUBLIC_BASE_PATH environment variable
+  basePath: process.env.BASE_PATH || process.env.NEXT_PUBLIC_BASE_PATH || '',
+  
+  assetPrefix: process.env.TAURI_ENV ? '/' : undefined,
+
+  env: {
+    NEXT_PUBLIC_APP_VERSION: resolveAppVersion(),
+    NEXT_PUBLIC_BUILD_DATE: new Date().toISOString(),
+    NEXT_PUBLIC_DISABLE_UPDATE_CHECK:
+      process.env.DISABLE_UPDATE_CHECK || process.env.NEXT_PUBLIC_DISABLE_UPDATE_CHECK || 'false',
+  },
 
   // Webpack configuration for WASM modules
   webpack: (config, { isServer, webpack }) => {
@@ -112,9 +147,9 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // LibreOffice WASM .wasm.gz — serve as application/wasm with gzip Content-Encoding
+        // LibreOffice WASM .wasm.bin.gz — serve as application/wasm with gzip Content-Encoding
         // Same approach as BentoPDF's nginx config so browser decompresses transparently
-        source: '/libreoffice-wasm/soffice.wasm.gz',
+        source: '/libreoffice-wasm/soffice.wasm.bin.gz',
         headers: [
           { key: 'Content-Type', value: 'application/wasm' },
           { key: 'Content-Encoding', value: 'gzip' },
@@ -125,11 +160,33 @@ const nextConfig = {
         ],
       },
       {
-        // LibreOffice WASM .data.gz — serve as application/octet-stream with gzip Content-Encoding
-        source: '/libreoffice-wasm/soffice.data.gz',
+        // LibreOffice WASM .data.bin.gz — serve as application/octet-stream with gzip Content-Encoding
+        source: '/libreoffice-wasm/soffice.data.bin.gz',
         headers: [
           { key: 'Content-Type', value: 'application/octet-stream' },
           { key: 'Content-Encoding', value: 'gzip' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+        ],
+      },
+      {
+        // LibreOffice WASM .wasm.bin (decompressed) — serve as application/wasm
+        source: '/libreoffice-wasm/soffice.wasm.bin',
+        headers: [
+          { key: 'Content-Type', value: 'application/wasm' },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+          { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+        ],
+      },
+      {
+        // LibreOffice WASM .data.bin (decompressed) — serve as application/octet-stream
+        source: '/libreoffice-wasm/soffice.data.bin',
+        headers: [
+          { key: 'Content-Type', value: 'application/octet-stream' },
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
           { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
@@ -155,6 +212,18 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'cross-origin',
+          },
         ],
       },
       {
@@ -168,19 +237,27 @@ const nextConfig = {
         ],
       },
       {
-        // HTML pages - short cache with revalidation
+        // MJS files (ES modules) - correct MIME for module scripts
+        source: '/:path*.mjs',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Global security & caching headers for all routes
         source: '/:path*',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, max-age=0, must-revalidate',
           },
-        ],
-      },
-      {
-        // Security headers for all routes
-        source: '/:path*',
-        headers: [
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',

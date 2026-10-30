@@ -11,6 +11,8 @@ import { RecentFilesDropdown } from '@/components/common/RecentFilesDropdown';
 import { searchTools, SearchResult } from '@/lib/utils/search';
 import { getToolContent } from '@/config/tool-content';
 import { getAllTools } from '@/config/tools';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { UpdateCheckButton } from '@/components/common/UpdateCheckButton';
 
 export interface HeaderProps {
   locale: Locale;
@@ -156,6 +158,7 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
 
   const navItems = [
     { href: `/${locale}`, label: t('navigation.home') },
+    { href: `/${locale}/studio`, label: 'Studio' },
     { href: `/${locale}/tools`, label: t('navigation.tools') },
     { href: `/${locale}/workflow`, label: t('navigation.workflow') || 'Workflow' },
     { href: `/${locale}/about`, label: t('navigation.about') },
@@ -173,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
       <div className="container mx-auto px-4">
         <div className="flex h-20 items-center justify-between">
           {/* Logo and Brand */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 items-center gap-2">
             <Link
               href={`/${locale}`}
               className="group flex items-center gap-2.5 text-xl font-bold text-[hsl(var(--color-foreground))] hover:opacity-90 transition-opacity"
@@ -206,19 +209,31 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
             role="navigation"
             aria-label="Main navigation"
           >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="px-4 py-1.5 text-sm font-medium text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5] rounded-full transition-all"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isStudio = item.href.endsWith('/studio');
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all inline-flex items-center gap-1.5 ${
+                    isStudio
+                      ? 'text-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary)/0.1)]'
+                      : 'text-[hsl(var(--color-muted-foreground))] hover:text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))/0.5]'
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  {isStudio && (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[hsl(var(--color-primary))] text-white leading-none">
+                      NEW
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-1 items-center justify-end gap-3">
             {/* Search */}
             {showSearch && (
               <div className="relative" ref={searchContainerRef}>
@@ -315,6 +330,9 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
               }}
             />
 
+            {/* Update Check Button */}
+            <UpdateCheckButton />
+
             {/* GitHub Repository Link */}
             <a
               href="https://github.com/PDFCraftTool/pdfcraft"
@@ -325,6 +343,9 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
             >
               <Github className="h-5 w-5" aria-hidden="true" />
             </a>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Language Selector placeholder */}
             <div id="language-selector-slot" />
@@ -357,17 +378,29 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
             aria-label="Mobile navigation"
           >
             <ul className="flex flex-col gap-2 p-2">
-              {navItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="block px-4 py-3 text-base font-medium text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))] rounded-lg transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {navItems.map((item) => {
+                const isStudio = item.href.endsWith('/studio');
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center justify-between px-4 py-3 text-base font-medium rounded-lg transition-colors ${
+                        isStudio
+                          ? 'text-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary)/0.06)] hover:bg-[hsl(var(--color-primary)/0.12)]'
+                          : 'text-[hsl(var(--color-foreground))] hover:bg-[hsl(var(--color-muted))]'
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <span>{item.label}</span>
+                      {isStudio && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[hsl(var(--color-primary))] text-white">
+                          NEW
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
               {/* GitHub Link in Mobile Menu */}
               <li>
                 <a

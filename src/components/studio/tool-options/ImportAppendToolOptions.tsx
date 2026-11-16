@@ -21,9 +21,9 @@ export function ImportAppendToolOptions({
   toolId,
   options,
   onChange,
-  locale = 'en',
+  locale = 'zh',
 }: ImportAppendToolOptionsProps) {
-  const validLocale = (locale as string) || 'en';
+  const validLocale = (locale as string) || 'zh';
   const isZh = validLocale.toLowerCase().startsWith('zh');
 
   switch (toolId) {

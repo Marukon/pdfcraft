@@ -33,9 +33,9 @@ export function OrganizeToolOptions({
   options,
   onChange,
   totalPages = 1,
-  locale = 'en',
+  locale = 'zh',
 }: OrganizeToolOptionsProps) {
-  const validLocale = (locale as string) || 'en';
+  const validLocale = (locale as string) || 'zh';
   const isZh = validLocale.toLowerCase().startsWith('zh');
 
   switch (toolId) {

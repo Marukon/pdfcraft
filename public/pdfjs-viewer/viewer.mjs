@@ -649,7 +649,7 @@ const defaultOptions = {
   },
   localeProperties: {
     value: {
-      lang: navigator.language || "en-US"
+      lang: "zh-CN"
     },
     kind: OptionKind.BROWSER
   },

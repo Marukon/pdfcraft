@@ -25,6 +25,6 @@ interface StudioPageClientProps {
   locale?: Locale;
 }
 
-export default function StudioPageClient({ locale = 'en' }: StudioPageClientProps) {
+export default function StudioPageClient({ locale = 'zh' }: StudioPageClientProps) {
   return <PDFStudio locale={locale} />;
 }

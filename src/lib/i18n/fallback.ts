@@ -1,43 +1,13 @@
-/**
- * Translation Fallback Mechanism
- * Provides utilities for handling missing translations by falling back to English
- */
-
-import { type Locale, defaultLocale } from './config';
+import { type Locale } from './config';
+import zh from '../../../messages/zh.json';
 
 // Type for nested translation messages
 export type NestedMessages = {
   [key: string]: string | NestedMessages;
 };
 
-// Cache for loaded messages
-const messagesCache: Partial<Record<Locale, NestedMessages>> = {};
-
-/**
- * Load messages for a specific locale
- * Returns cached messages if available
- */
-export async function loadMessages(locale: Locale): Promise<NestedMessages> {
-  if (messagesCache[locale]) {
-    return messagesCache[locale]!;
-  }
-
-  try {
-    const messages = await import(`../../../messages/${locale}.json`);
-    messagesCache[locale] = messages.default;
-    return messages.default;
-  } catch {
-    // If locale file doesn't exist, return empty object
-    // Fallback will handle missing keys
-    return {};
-  }
-}
-
-/**
- * Load English messages (used as fallback)
- */
-export async function loadEnglishMessages(): Promise<NestedMessages> {
-  return loadMessages(defaultLocale);
+export async function loadMessages(_locale: Locale): Promise<NestedMessages> {
+  return zh;
 }
 
 /**
@@ -62,12 +32,12 @@ export function getNestedValue(
 }
 
 /**
- * Get translation with fallback to English
- * If the key doesn't exist in the target locale, returns the English translation
+ * Get translation with fallback to the default locale
+ * If the key doesn't exist in the target locale, returns the the default locale translation
  */
 export function getTranslationWithFallback(
   messages: NestedMessages,
-  englishMessages: NestedMessages,
+  fallbackMessages: NestedMessages,
   key: string
 ): string {
   // Try to get the translation from the target locale
@@ -77,28 +47,28 @@ export function getTranslationWithFallback(
     return translation;
   }
 
-  // Fall back to English
-  const englishTranslation = getNestedValue(englishMessages, key);
+  // Fall back to the default locale
+  const englishTranslation = getNestedValue(fallbackMessages, key);
   
   if (englishTranslation !== undefined) {
     return englishTranslation;
   }
 
-  // If not found in English either, return the key itself
+  // If not found in the default locale either, return the key itself
   return key;
 }
 
 /**
- * Merge messages with English fallback
- * Creates a complete messages object where missing keys are filled from English
+ * Merge messages with the default locale fallback
+ * Creates a complete messages object where missing keys are filled from the default locale
  */
 export function mergeWithFallback(
   messages: NestedMessages,
-  englishMessages: NestedMessages
+  fallbackMessages: NestedMessages
 ): NestedMessages {
   const result: NestedMessages = {};
 
-  // First, copy all English messages as base
+  // First, copy all the default locale messages as base
   function deepCopy(source: NestedMessages, target: NestedMessages): void {
     for (const key of Object.keys(source)) {
       const value = source[key];
@@ -111,7 +81,7 @@ export function mergeWithFallback(
     }
   }
 
-  deepCopy(englishMessages, result);
+  deepCopy(fallbackMessages, result);
 
   // Then, override with locale-specific messages
   function deepMerge(source: NestedMessages, target: NestedMessages): void {
@@ -138,10 +108,10 @@ export function mergeWithFallback(
  */
 export function createTranslator(
   messages: NestedMessages,
-  englishMessages: NestedMessages
+  fallbackMessages: NestedMessages
 ): (key: string, params?: Record<string, string | number>) => string {
   return (key: string, params?: Record<string, string | number>): string => {
-    let translation = getTranslationWithFallback(messages, englishMessages, key);
+    let translation = getTranslationWithFallback(messages, fallbackMessages, key);
 
     // Replace parameters in the translation
     if (params) {
@@ -168,11 +138,11 @@ export function hasTranslation(
 }
 
 /**
- * Get all missing translation keys for a locale compared to English
+ * Get all missing translation keys for a locale compared to the default locale
  */
 export function getMissingKeys(
   messages: NestedMessages,
-  englishMessages: NestedMessages,
+  fallbackMessages: NestedMessages,
   prefix: string = ''
 ): string[] {
   const missingKeys: string[] = [];
@@ -201,6 +171,6 @@ export function getMissingKeys(
     }
   }
 
-  checkKeys(englishMessages, messages, prefix);
+  checkKeys(fallbackMessages, messages, prefix);
   return missingKeys;
 }

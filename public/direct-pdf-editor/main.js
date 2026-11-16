@@ -5,8 +5,7 @@ window.appModule = appModule;
 
 // URL params and locale setup
 const urlParams = new URLSearchParams(window.location.search);
-const currentLang = (urlParams.get('lang') || navigator.language || 'en').toLowerCase();
-const isZh = currentLang.startsWith('zh');
+const isZh = true;
 
 // Translations
 const I18N = {
@@ -44,45 +43,10 @@ const I18N = {
     toBack: '置于底层',
     duplicate: '复制',
     delete: '删除'
-  },
-  en: {
-    back: 'Back to upload',
-    open: 'Open',
-    export: 'Export (⌘S)',
-    undo: 'Undo (⌘Z)',
-    redo: 'Redo (⇧⌘Z)',
-    editAll: 'Edit All',
-    editText: 'Edit Text',
-    editImages: 'Edit Images',
-    editShapes: 'Edit Shapes',
-    addText: 'Add Text',
-    find: 'Find & Replace',
-    docInfo: 'Document Properties',
-    fitPage: 'Fit to Page',
-    fitWidth: 'Fit to Width',
-    saved: 'Saved successfully! File exported.',
-    loading: 'Loading PDF editor engine...',
-    errLoad: 'Failed to load PDF, please check file format.',
-    font: 'Font',
-    size: 'Size',
-    color: 'Color',
-    align: 'Alignment',
-    spacing: 'Spacing',
-    lineSp: 'Line',
-    paraSp: 'Paragraph',
-    charSp: 'Character',
-    wordSp: 'Word',
-    rotate: 'Rotate',
-    flip: 'Flip',
-    replaceImg: 'Replace Image',
-    toFront: 'Bring to Front',
-    toBack: 'Send to Back',
-    duplicate: 'Duplicate',
-    delete: 'Delete'
   }
 };
 
-const t = isZh ? I18N.zh : I18N.en;
+const t = I18N.zh;
 
 function applyI18n() {
   if (!isZh) return;

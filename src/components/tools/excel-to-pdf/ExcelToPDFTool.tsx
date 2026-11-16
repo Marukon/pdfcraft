@@ -46,23 +46,23 @@ export function ExcelToPDFTool({ className = '' }: ExcelToPDFToolProps) {
                     if (cancelled) return;
                     setPreloadStatus('complete');
                     setPreloadProgress(100);
-                    setPreloadMessage('Conversion engine ready.');
+                    setPreloadMessage(t('conversionEngine.ready'));
                     return;
                 }
 
                 setPreloadStatus('processing');
                 setPreloadProgress(0);
-                setPreloadMessage('Loading conversion engine...');
+                setPreloadMessage(t('conversionEngine.loading'));
 
                 await preloadExcelPyodide((message) => {
                     if (cancelled) return;
-                    setPreloadMessage(message || 'Loading conversion engine...');
+                    setPreloadMessage(t('conversionEngine.loading'));
                 });
 
                 if (cancelled) return;
                 setPreloadStatus('complete');
                 setPreloadProgress(100);
-                setPreloadMessage('Conversion engine ready.');
+                setPreloadMessage(t('conversionEngine.ready'));
             } catch (err) {
                 if (cancelled) return;
                 console.warn('[ExcelToPDF] Engine preload warning:', err);
@@ -71,7 +71,7 @@ export function ExcelToPDFTool({ className = '' }: ExcelToPDFToolProps) {
             }
         })();
         return () => { cancelled = true; };
-    }, []);
+    }, [t]);
 
     const handleFilesSelected = useCallback((newFiles: File[]) => {
         if (newFiles.length > 0) {

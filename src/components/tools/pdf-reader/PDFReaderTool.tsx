@@ -22,7 +22,7 @@ export interface PDFReaderToolProps {
  * A full-featured PDF reader with automatic selection-to-clipboard synchronization.
  */
 export function PDFReaderTool({ className = '' }: PDFReaderToolProps) {
-    const t = useTranslations('common');
+  const t = useTranslations('common');
     const tTools = useTranslations('tools');
 
     const [file, setFile] = useState<File | null>(null);

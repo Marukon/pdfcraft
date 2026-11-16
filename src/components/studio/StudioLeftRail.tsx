@@ -117,7 +117,7 @@ export const StudioLeftRail: React.FC<StudioLeftRailProps> = ({
   isCollapsed,
   onToggleCollapse,
   disabled = false,
-  locale = 'en',
+  locale = 'zh',
   onQuickApply,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,7 +127,7 @@ export const StudioLeftRail: React.FC<StudioLeftRailProps> = ({
   const [recentToolIds, setRecentToolIds] = useState<string[]>([]);
   const [flyoutCategory, setFlyoutCategory] = useState<string | null>(null);
 
-  const validLocale = (locale as Locale) || 'en';
+  const validLocale = (locale as Locale) || 'zh';
   const isZh = typeof validLocale === 'string' && validLocale.toLowerCase().startsWith('zh');
 
   // Load favorites & recent from storage

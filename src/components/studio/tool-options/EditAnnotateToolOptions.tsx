@@ -26,9 +26,9 @@ export function EditAnnotateToolOptions({
   options,
   onChange,
   totalPages = 1,
-  locale = 'en',
+  locale = 'zh',
 }: EditAnnotateToolOptionsProps) {
-  const validLocale = (locale as string) || 'en';
+  const validLocale = (locale as string) || 'zh';
   const isZh = validLocale.toLowerCase().startsWith('zh');
 
   switch (toolId) {

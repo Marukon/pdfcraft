@@ -6,7 +6,6 @@ import {
   LOCALE_CONFIG,
   localeConfig,
   locales,
-  type Locale,
   type NestedMessages,
   getNestedValue,
   getTranslationWithFallback,
@@ -14,12 +13,10 @@ import {
   getLocalizedPath,
   isValidLocale,
 } from '@/lib/i18n';
-import enMessages from '../../../messages/en.json';
-import jaMessages from '../../../messages/ja.json';
+import zhMessages from '../../../messages/zh.json';
 
-// Cast imported JSON to NestedMessages type
-const englishMessages = enMessages as unknown as NestedMessages;
-const japaneseMessages = jaMessages as unknown as NestedMessages;
+const baseMessages: NestedMessages = zhMessages;
+const partialMessages: NestedMessages = { common: { brand: 'PDFCraft' } };
 
 describe('i18n Property Tests', () => {
   /**
@@ -42,18 +39,13 @@ describe('i18n Property Tests', () => {
     );
   });
 
-  it('registers Polish metadata and replaces locale prefixes safely', () => {
-    expect(localeConfig.pl).toEqual({
-      name: 'Polish',
-      nativeName: 'Polski',
-      direction: 'ltr',
-      dateFormat: 'DD.MM.YYYY',
-    });
-    expect(getLocalizedPath('/pl/tools/merge-pdf', 'en')).toBe('/en/tools/merge-pdf');
-    expect(getLocalizedPath('/zh-TW/tools/merge-pdf', 'pl')).toBe('/pl/tools/merge-pdf');
-    expect(getLocalizedPath('/pl', 'pl')).toBe('/pl/');
-    expect(getLocalizedPath('/plasma', 'pl')).toBe('/pl/plasma');
-    expect(getLocalizedPath('tools/merge-pdf', 'pl')).toBe('/pl/tools/merge-pdf');
+  it('registers only Simplified Chinese and preserves localized URLs', () => {
+    expect(locales).toEqual(['zh']);
+    expect(DEFAULT_LOCALE).toBe('zh');
+    expect(localeConfig.zh.nativeName).toBe('简体中文');
+    expect(isValidLocale('zh-TW')).toBe(false);
+    expect(getLocalizedPath('/zh/tools/merge-pdf', 'zh')).toBe('/zh/tools/merge-pdf');
+    expect(getLocalizedPath('/zhushi', 'zh')).toBe('/zh/zhushi');
   });
 
   /**
@@ -69,15 +61,11 @@ describe('i18n Property Tests', () => {
    * Property: All non-Arabic locales have LTR direction
    */
   it('all locales have correct text direction', () => {
-    const RTL_LOCALES: string[] = ['ar', 'he'];
     fc.assert(
       fc.property(
         fc.constantFrom(...SUPPORTED_LOCALES),
         (locale) => {
           const config = LOCALE_CONFIG[locale];
-          if (RTL_LOCALES.includes(locale)) {
-            return config.direction === 'rtl';
-          }
           return config.direction === 'ltr';
         }
       ),
@@ -89,11 +77,11 @@ describe('i18n Property Tests', () => {
    * **Feature: nextjs-pdf-toolkit, Property 6: Translation Fallback**
    * **Validates: Requirements 3.6**
    * 
-   * For any translation key that does not exist in a non-English locale,
-   * requesting that key SHALL return the English translation value.
+   * For any translation key that does not exist in a partial catalog,
+   * requesting that key SHALL return the Simplified Chinese translation value.
    */
-  it('Property 6: missing translations fall back to English', () => {
-    // Get all keys from English messages
+  it('Property 6: missing translations fall back to Simplified Chinese', () => {
+    // Get all keys from Simplified Chinese messages
     const getAllKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
       const keys: string[] = [];
       for (const key of Object.keys(obj)) {
@@ -108,36 +96,30 @@ describe('i18n Property Tests', () => {
       return keys;
     };
 
-    const englishKeys = getAllKeys(enMessages);
+    const englishKeys = getAllKeys(zhMessages);
 
     fc.assert(
       fc.property(
-        // Generate non-English locales
-        fc.constantFrom(...locales.filter((l): l is Locale => l !== 'en')),
-        // Generate a random key that exists in English
+        // Generate a random key that exists in Simplified Chinese
         fc.constantFrom(...englishKeys),
-        (locale, key) => {
-          // Create a mock locale messages object with some keys missing
-          // For this test, we'll use Japanese as an example
-          const localeMessages = locale === 'ja' ? japaneseMessages : ({} as NestedMessages);
-
+        (key) => {
           // Get the translation with fallback
           const result = getTranslationWithFallback(
-            localeMessages,
-            englishMessages,
+            partialMessages,
+            baseMessages,
             key
           );
 
-          // Get the English value
+          // Get the Simplified Chinese value
           const englishValue = getNestedValue(
-            englishMessages,
+            baseMessages,
             key
           );
 
           // The result should either be the locale-specific translation
-          // or fall back to English (never undefined for valid English keys)
+          // or fall back to Simplified Chinese (never undefined for valid Simplified Chinese keys)
           if (englishValue !== undefined) {
-            // Result should be a string (either locale-specific or English fallback)
+            // Result should be a string (either locale-specific or Simplified Chinese fallback)
             expect(typeof result).toBe('string');
             expect(result.length).toBeGreaterThan(0);
           }
@@ -153,7 +135,7 @@ describe('i18n Property Tests', () => {
    * **Feature: nextjs-pdf-toolkit, Property 6: Translation Fallback (Nonexistent Keys)**
    * **Validates: Requirements 3.6**
    * 
-   * For any nonexistent key in both locale and English,
+   * For any nonexistent key in both locale and Simplified Chinese,
    * the fallback mechanism should return the key itself.
    */
   it('Property 6: nonexistent keys return the key itself', () => {
@@ -165,8 +147,8 @@ describe('i18n Property Tests', () => {
           const nonexistentKey = `nonexistent.${randomKey}`;
 
           const result = getTranslationWithFallback(
-            japaneseMessages,
-            englishMessages,
+            partialMessages,
+            baseMessages,
             nonexistentKey
           );
 
@@ -183,10 +165,10 @@ describe('i18n Property Tests', () => {
    * **Feature: nextjs-pdf-toolkit, Property 6: Merged Messages Completeness**
    * **Validates: Requirements 3.6**
    * 
-   * For any locale, merging with English fallback should produce
-   * a messages object that contains all English keys.
+   * For any locale, merging with Simplified Chinese fallback should produce
+   * a messages object that contains all Simplified Chinese keys.
    */
-  it('Property 6: merged messages contain all English keys', () => {
+  it('Property 6: merged messages contain all Simplified Chinese keys', () => {
     const getAllKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
       const keys: string[] = [];
       for (const key of Object.keys(obj)) {
@@ -201,12 +183,12 @@ describe('i18n Property Tests', () => {
       return keys;
     };
 
-    const englishKeys = getAllKeys(enMessages);
+    const englishKeys = getAllKeys(zhMessages);
 
-    // Merge Japanese messages with English fallback
+    // Merge partial messages with Simplified Chinese fallback
     const mergedMessages = mergeWithFallback(
-      japaneseMessages,
-      englishMessages
+      partialMessages,
+      baseMessages
     );
 
     fc.assert(
@@ -214,7 +196,7 @@ describe('i18n Property Tests', () => {
         fc.constantFrom(...englishKeys),
         (key) => {
           const value = getNestedValue(mergedMessages, key);
-          // Every English key should exist in merged messages
+          // Every Simplified Chinese key should exist in merged messages
           expect(value).toBeDefined();
           expect(typeof value).toBe('string');
           return true;

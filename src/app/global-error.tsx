@@ -13,7 +13,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html lang="en">
+    <html lang="zh-CN">
       <body style={{ 
         margin: 0, 
         minHeight: '100vh', 
@@ -41,14 +41,14 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             </svg>
           </div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#0f172a' }}>
-            Something went wrong
+            页面出错了
           </h1>
           <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>
-            A critical error occurred. Please try again.
+            请重试，或返回首页。
           </p>
           {error.digest && (
             <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '1rem', fontFamily: 'monospace' }}>
-              Error ID: {error.digest}
+              错误编号： {error.digest}
             </p>
           )}
           <button
@@ -64,7 +64,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               marginRight: '0.5rem'
             }}
           >
-            Try again
+            重试
           </button>
           <button
             onClick={() => window.location.href = '/'}
@@ -78,7 +78,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               cursor: 'pointer'
             }}
           >
-            Go home
+            返回首页
           </button>
         </div>
       </body>

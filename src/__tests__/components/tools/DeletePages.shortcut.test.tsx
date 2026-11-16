@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/zh.json';
 import { DeletePagesTool } from '@/components/tools/delete/DeletePagesTool';
 
 vi.mock('@/components/tools/FileUploader', () => ({
@@ -40,7 +40,7 @@ vi.mock('pdfjs-dist', () => ({
 
 const renderDeletePagesTool = () => {
   return render(
-    <NextIntlClientProvider locale="en" messages={messages}>
+    <NextIntlClientProvider locale="zh" messages={messages}>
       <DeletePagesTool />
     </NextIntlClientProvider>
   );

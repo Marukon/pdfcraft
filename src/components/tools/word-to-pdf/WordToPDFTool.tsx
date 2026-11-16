@@ -58,7 +58,7 @@ export function WordToPDFTool({ className = '' }: WordToPDFToolProps) {
                     setPreloadStatus('complete');
                     setPreloadProgress(100);
                     setPreloadMessage(
-                        'Compatibility mode: .docx converts without server isolation headers. .doc/.odt/.rtf need COOP/COEP on your host.'
+                        t('conversionEngine.compatibility')
                     );
                     return;
                 }
@@ -69,13 +69,13 @@ export function WordToPDFTool({ className = '' }: WordToPDFToolProps) {
 
                 setPreloadStatus('processing');
                 setPreloadProgress(0);
-                setPreloadMessage('Checking environment...');
+                setPreloadMessage(t('conversionEngine.checking'));
 
                 await converter.initialize((loadProgress: { percent: number; message: string; phase?: string }) => {
                     if (cancelled) return;
                     setPreloadStatus('processing');
                     setPreloadProgress(loadProgress.percent);
-                    setPreloadMessage(loadProgress.message || 'Loading conversion engine...');
+                    setPreloadMessage(t('conversionEngine.loading'));
 
                     if (loadProgress.phase === 'ready' || loadProgress.percent >= 100) {
                         setPreloadStatus('complete');
@@ -85,15 +85,15 @@ export function WordToPDFTool({ className = '' }: WordToPDFToolProps) {
                 if (cancelled) return;
                 setPreloadStatus('complete');
                 setPreloadProgress(100);
-                setPreloadMessage('Conversion engine ready!');
+                setPreloadMessage(t('conversionEngine.ready'));
             } catch (err) {
                 if (cancelled) return;
                 setPreloadStatus('error');
-                setPreloadMessage(err instanceof Error ? err.message : 'Failed to preload conversion engine.');
+                setPreloadMessage(err instanceof Error ? err.message : t('conversionEngine.failed'));
             }
         })();
         return () => { cancelled = true; };
-    }, []);
+    }, [t]);
 
     /**
      * Handle file selected from uploader
@@ -338,20 +338,20 @@ export function WordToPDFTool({ className = '' }: WordToPDFToolProps) {
 
             <BatchProcessingPanel
                 translations={{
-                    title: 'Batch Word to PDF',
-                    addFiles: 'Click or drop files to add',
-                    clearAll: 'Clear all',
-                    startProcessing: 'Start batch conversion',
-                    cancelProcessing: 'Cancel',
-                    downloadAll: 'Download all',
-                    downloadZip: 'Download ZIP',
-                    pending: 'Pending',
-                    processing: 'Processing',
-                    completed: 'Completed',
-                    error: 'Error',
-                    progress: 'Overall progress',
-                    filesSelected: 'files',
-                    noFiles: 'No files added yet.',
+                    title: t('batchProcessing.title'),
+                    addFiles: t('batchProcessing.addFiles'),
+                    clearAll: t('batchProcessing.clearAll'),
+                    startProcessing: t('batchProcessing.startProcessing'),
+                    cancelProcessing: t('batchProcessing.cancelProcessing'),
+                    downloadAll: t('batchProcessing.downloadAll'),
+                    downloadZip: t('batchProcessing.downloadZip'),
+                    pending: t('batchProcessing.pending'),
+                    processing: t('batchProcessing.processing'),
+                    completed: t('batchProcessing.completed'),
+                    error: t('batchProcessing.error'),
+                    progress: t('batchProcessing.progress'),
+                    filesSelected: t('batchProcessing.filesSelected'),
+                    noFiles: t('batchProcessing.noFiles'),
                 }}
                 acceptedTypes=".docx,.doc,.odt"
                 processor={handleBatchProcess}

@@ -230,26 +230,7 @@ export function generateWebPageSchema(
   content: ToolContent,
   locale: Locale
 ): WebPageSchema {
-  const languageMap: Record<Locale, string> = {
-    en: 'en-US',
-    ja: 'ja-JP',
-    ko: 'ko-KR',
-    es: 'es-ES',
-    fr: 'fr-FR',
-    de: 'de-DE',
-    zh: 'zh-CN',
-    'zh-TW': 'zh-TW',
-    pt: 'pt-BR',
-    ar: 'ar-AR',
-    he: 'he-IL',
-    it: 'it-IT',
-    id: 'id-ID',
-    vi: 'vi-VN',
-    ro: 'ro-RO',
-    pl: 'pl-PL',
-    cs: 'cs-CZ',
-    hi: 'hi-IN',
-  };
+  const language = 'zh-CN';
 
   return {
     '@context': 'https://schema.org',
@@ -257,7 +238,7 @@ export function generateWebPageSchema(
     name: content.title,
     description: content.metaDescription,
     url: `${siteConfig.url}/${locale}/tools/${tool.slug}`,
-    inLanguage: languageMap[locale] || 'en-US',
+    inLanguage: language,
     isPartOf: {
       '@type': 'WebSite',
       name: siteConfig.name,

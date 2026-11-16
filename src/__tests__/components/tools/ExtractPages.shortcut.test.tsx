@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, act } from '@testing-library/react';
 import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/zh.json';
 import { ExtractPagesTool } from '@/components/tools/extract/ExtractPagesTool';
 
 vi.mock('@/components/tools/FileUploader', () => ({
@@ -40,7 +40,7 @@ vi.mock('pdfjs-dist', () => ({
 
 const renderExtractPagesTool = () => {
   return render(
-    <NextIntlClientProvider locale="en" messages={messages}>
+    <NextIntlClientProvider locale="zh" messages={messages}>
       <ExtractPagesTool />
     </NextIntlClientProvider>
   );
@@ -172,7 +172,7 @@ describe('ExtractPagesTool - Select All Shortcut (Issue #176)', () => {
     await screen.findByRole('button', { name: 'Page 1 (selected)' });
 
     // Click Deselect All button
-    fireEvent.click(screen.getByRole('button', { name: /Deselect All/i }));
+    fireEvent.click(screen.getByRole('button', { name: messages.common.buttons.deselectAll }));
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: 'Page 1 (selected)' })).not.toBeInTheDocument();
     });

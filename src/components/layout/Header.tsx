@@ -347,9 +347,6 @@ export const Header: React.FC<HeaderProps> = ({ locale, showSearch = true }) => 
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* Language Selector placeholder */}
-            <div id="language-selector-slot" />
-
             {/* Mobile Menu Toggle */}
             <Button
               variant="ghost"

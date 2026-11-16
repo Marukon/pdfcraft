@@ -106,6 +106,13 @@
       "progress": "进度",
       "files": "文件"
     },
+    "conversionEngine": {
+      "ready": "转换引擎已就绪",
+      "loading": "正在加载转换引擎…",
+      "checking": "正在检查运行环境…",
+      "failed": "转换引擎加载失败。",
+      "compatibility": "当前为兼容模式：支持转换 .docx。若需转换 .doc、.odt 或 .rtf，请启用跨源隔离。"
+    },
     "batchProcessing": {
       "title": "批量处理",
       "addFiles": "拖放文件或点击添加",

@@ -235,11 +235,11 @@ export const StudioToolDrawer: React.FC<StudioToolDrawerProps> = ({
   onApply,
   onExport,
   isApplying,
-  locale = 'en',
+  locale = 'zh',
   availableDocuments = [],
   totalPages = 1,
 }) => {
-  const validLocale = (locale as Locale) || 'en';
+  const validLocale = (locale as Locale) || 'zh';
   const isZh = typeof validLocale === 'string' && validLocale.toLowerCase().startsWith('zh');
 
   // Dynamic tool-specific options (aligned across all 67+ tools)

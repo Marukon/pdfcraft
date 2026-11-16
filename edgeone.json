@@ -1,8 +1,20 @@
 {
+  "installCommand": "npm ci --ignore-scripts",
+  "buildCommand": "npm run build:edgeone",
+  "outputDirectory": "edgeone-dist",
+  "nodeVersion": "22.11.0",
   "headers": [
     {
       "source": "/*",
       "headers": [
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Embedder-Policy",
+          "value": "require-corp"
+        },
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow, noarchive, nosnippet"
@@ -14,6 +26,15 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/*.mjs",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
         }
       ]
     },

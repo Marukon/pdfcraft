@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const edgeOneBuild = process.env.NEXT_PUBLIC_EDGEONE_BUILD === '1';
 
 function resolveAppVersion() {
   if (process.env.APP_VERSION) return process.env.APP_VERSION;
@@ -33,6 +34,14 @@ function resolveAppVersion() {
 const nextConfig = {
   // Enable static export for deployment flexibility
   output: 'export',
+
+  ...(edgeOneBuild && {
+    experimental: {
+      cpus: 2,
+      webpackBuildWorker: true,
+      webpackMemoryOptimizations: true,
+    },
+  }),
   
   // Support deployment under a subpath (e.g., /pdfcraft/)
   // Use BASE_PATH or NEXT_PUBLIC_BASE_PATH environment variable
@@ -49,6 +58,7 @@ const nextConfig = {
 
   // Webpack configuration for WASM modules
   webpack: (config, { isServer, webpack }) => {
+    if (edgeOneBuild) config.cache = false;
     // Handle qpdf-wasm and other modules that use Node.js built-ins
     if (!isServer) {
       config.resolve.fallback = {

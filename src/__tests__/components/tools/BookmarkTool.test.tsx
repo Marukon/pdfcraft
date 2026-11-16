@@ -5,7 +5,7 @@ import { PDFDocument, PDFDict, PDFArray, PDFName, PDFHexString, PDFRef } from 'p
 
 const persistence = vi.hoisted(() => ({ file: null as File | null, realProcessor: false, outline: null as any[] | null, destinations: {} as Record<string, any[]> }));
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/zh.json';
 import { BookmarkTool } from '@/components/tools/bookmark/BookmarkTool';
 import { processBookmarks } from '@/lib/pdf/processors/bookmark';
 
@@ -57,7 +57,7 @@ vi.mock('@/lib/pdf/processors/bookmark', async (importOriginal) => {
 
 const renderAndLoad = async () => {
   render(
-    <NextIntlClientProvider locale="en" messages={messages}>
+    <NextIntlClientProvider locale="zh" messages={messages}>
       <BookmarkTool />
     </NextIntlClientProvider>
   );
@@ -101,13 +101,13 @@ describe('BookmarkTool', () => {
   it('removes all bookmarks after confirmation and saves a PDF with none', async () => {
     await renderAndLoad();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove all' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.removeAll }));
 
     expect(window.confirm).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Cover')).not.toBeInTheDocument();
-    expect(screen.getByText('All bookmarks removed. Save to download a PDF with no bookmarks.')).toBeInTheDocument();
+    expect(screen.getByText(messages.tools.bookmark.removedAllHint)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual([]);
   });
@@ -116,7 +116,7 @@ describe('BookmarkTool', () => {
     vi.mocked(window.confirm).mockReturnValue(false);
     await renderAndLoad();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove all' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.removeAll }));
 
     expect(screen.getByText('Cover')).toBeInTheDocument();
     expect(screen.getByText('Chapter 1')).toBeInTheDocument();
@@ -125,37 +125,37 @@ describe('BookmarkTool', () => {
   it('Shift+click checks a range and Remove selected deletes only those bookmarks', async () => {
     await renderAndLoad();
 
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Cover"' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Page 3"' }), { shiftKey: true });
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Cover”' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Page 3”' }), { shiftKey: true });
 
-    expect(screen.getByRole('checkbox', { name: 'Select "Page 2"' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Select "Contents"' })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '选择“Page 2”' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '选择“Contents”' })).not.toBeChecked();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove selected (3)' }));
+    fireEvent.click(screen.getByRole('button', { name: '移除所选（3）' }));
 
     expect(window.confirm).toHaveBeenCalledWith(
-      'Remove 3 selected bookmarks? Their child bookmarks will also be removed.'
+      '要移除所选的 3 个书签吗？其子书签也会一并移除。'
     );
     expect(screen.queryByText('Cover')).not.toBeInTheDocument();
     expect(screen.queryByText('Page 2')).not.toBeInTheDocument();
     expect(screen.queryByText('Page 3')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Remove selected/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /移除所选/ })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Contents', 'Chapter 1']);
   });
 
   it('removes the children of a checked bookmark and keeps the selection when cancelled', async () => {
     await renderAndLoad();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Contents"' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Contents”' }));
 
     vi.mocked(window.confirm).mockReturnValueOnce(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Remove selected (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: '移除所选（1）' }));
     expect(screen.getByText('Chapter 1')).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Select "Contents"' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '选择“Contents”' })).toBeChecked();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Remove selected (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: '移除所选（1）' }));
     expect(screen.queryByText('Contents')).not.toBeInTheDocument();
     expect(screen.queryByText('Chapter 1')).not.toBeInTheDocument();
     expect(screen.getByText('Cover')).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('BookmarkTool', () => {
       fireEvent.click(within(row).getByTitle('Delete'));
     }
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual([]);
   });
@@ -194,7 +194,7 @@ describe('BookmarkTool', () => {
       dragBookmark('Contents', 'Chapter 1', y);
       expect(screen.getByText('Contents')).toBeInTheDocument();
       expect(screen.getByText('Chapter 1')).toBeInTheDocument();
-      await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' })); });
+      await act(async () => { fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton })); });
       await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
       expect(savedTitles()).toEqual(['Cover', 'Page 2', 'Page 3', 'Contents', 'Chapter 1']);
       const items = vi.mocked(processBookmarks).mock.calls[0][1].bookmarks!;
@@ -205,7 +205,7 @@ describe('BookmarkTool', () => {
   it('keeps a subtree intact when moving its parent before a sibling', async () => {
     await renderAndLoad();
     dragBookmark('Contents', 'Cover', 5);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton })); });
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Contents', 'Chapter 1', 'Cover', 'Page 2', 'Page 3']);
   });
@@ -220,7 +220,7 @@ describe('BookmarkTool', () => {
     persistence.realProcessor = true;
     await renderAndLoad();
     dragBookmark('Contents', 'Chapter 1', 50);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' })); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton })); });
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     const output = await vi.mocked(processBookmarks).mock.results[0].value;
     expect(output.success).toBe(true);
@@ -271,8 +271,8 @@ describe('BookmarkTool', () => {
     fireEvent.click(screen.getAllByTitle('Edit')[0]);
     fireEvent.change(screen.getByDisplayValue('Cover'), { target: { value: 'Renamed cover' } });
     if (changed) fireEvent.change(screen.getByDisplayValue('2'), { target: { value: '4' } });
-    fireEvent.click(screen.getByTitle('Save'));
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' })); });
+    fireEvent.click(screen.getByTitle(messages.common.buttons.save));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton })); });
     const result = await vi.mocked(processBookmarks).mock.results[0].value;
     const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
       const reader = new FileReader();
@@ -300,31 +300,31 @@ describe('BookmarkTool', () => {
     fireEvent.click(screen.getByText('Cover'));
     fireEvent.click(screen.getByText('Page 3'), { shiftKey: true });
     for (const title of ['Cover', 'Page 2', 'Page 3']) {
-      expect(screen.getByRole('checkbox', { name: `Select "${title}"` })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: `选择“${title}”` })).toBeChecked();
     }
     fireEvent.click(screen.getByText('Page 2'), { ctrlKey: true });
-    expect(screen.getByRole('checkbox', { name: 'Select "Page 2"' })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '选择“Page 2”' })).not.toBeChecked();
     fireEvent.click(screen.getByText('Contents'), { metaKey: true });
-    expect(screen.getByRole('checkbox', { name: 'Select "Contents"' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: '选择“Contents”' })).toBeChecked();
   });
 
   it('moves nonadjacent selected bookmarks together in tree order', async () => {
     await renderAndLoad();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Page 3"' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Cover"' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Page 3”' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Cover”' }));
     dragBookmark('Page 3', 'Contents', 95);
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Page 2', 'Contents', 'Chapter 1', 'Cover', 'Page 3']);
   });
 
   it('nests a selection once and can return it to the top level', async () => {
     await renderAndLoad();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Cover"' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Page 2"' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Cover”' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Page 2”' }));
     dragBookmark('Cover', 'Contents', 50);
-    fireEvent.click(screen.getByRole('button', { name: 'Move selected to top level' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: '将选中书签移至顶层' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Page 3', 'Contents', 'Chapter 1', 'Cover', 'Page 2']);
     const roots = vi.mocked(processBookmarks).mock.calls[0][1].bookmarks!;
@@ -333,10 +333,10 @@ describe('BookmarkTool', () => {
 
   it('does not lose a multi-selection when dropped into a selected subtree', async () => {
     await renderAndLoad();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Cover"' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Select "Contents"' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Cover”' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择“Contents”' }));
     dragBookmark('Cover', 'Chapter 1', 50);
-    fireEvent.click(screen.getByRole('button', { name: 'Save Bookmarks' }));
+    fireEvent.click(screen.getByRole('button', { name: messages.tools.bookmark.saveButton }));
     await waitFor(() => expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Cover', 'Page 2', 'Page 3', 'Contents', 'Chapter 1']);
   });
@@ -358,10 +358,10 @@ describe('BookmarkTool', () => {
     ];
     await renderAndLoad();
     for (const title of ['Contents','Chapter 1','Cover']) {
-      fireEvent.click(screen.getByRole('checkbox', {name:`Select "${title}"`}));
+      fireEvent.click(screen.getByRole('checkbox', {name:`选择“${title}”`}));
     }
     dragBookmark('Contents', 'Page 2', 50);
-    await act(async () => { fireEvent.click(screen.getByRole('button', {name:'Save Bookmarks'})); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', {name:messages.tools.bookmark.saveButton})); });
     const output = await vi.mocked(processBookmarks).mock.results[0].value;
     expect(output.success).toBe(true);
     const buffer = await new Promise<ArrayBuffer>((resolve,reject) => {
@@ -401,7 +401,7 @@ describe('BookmarkTool', () => {
 
   it('handles a fast drag sequence without waiting for React renders between events', async () => {
     await renderAndLoad();
-    for (const title of ['Cover','Page 3']) fireEvent.click(screen.getByRole('checkbox',{name:`Select "${title}"`}));
+    for (const title of ['Cover','Page 3']) fireEvent.click(screen.getByRole('checkbox',{name:`选择“${title}”`}));
     const source = screen.getByText('Cover').closest('[draggable="true"]')!;
     const target = screen.getByText('Contents').closest('[draggable="true"]')!;
     vi.spyOn(target,'getBoundingClientRect').mockReturnValue({top:0,height:100} as DOMRect);
@@ -413,7 +413,7 @@ describe('BookmarkTool', () => {
       target.dispatchEvent(over);
       target.dispatchEvent(createEvent.drop(target));
     });
-    fireEvent.click(screen.getByRole('button',{name:'Save Bookmarks'}));
+    fireEvent.click(screen.getByRole('button',{name:messages.tools.bookmark.saveButton}));
     await waitFor(()=>expect(processBookmarks).toHaveBeenCalledTimes(1));
     expect(savedTitles()).toEqual(['Page 2','Contents','Chapter 1','Cover','Page 3']);
   });

@@ -27,9 +27,9 @@ export function OptimizeRepairToolOptions({
   options,
   onChange,
   totalPages = 1,
-  locale = 'en',
+  locale = 'zh',
 }: OptimizeRepairToolOptionsProps) {
-  const validLocale = (locale as string) || 'en';
+  const validLocale = (locale as string) || 'zh';
   const isZh = validLocale.toLowerCase().startsWith('zh');
 
   switch (toolId) {

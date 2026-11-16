@@ -74,12 +74,12 @@ function checkIsMac(): boolean {
 }
 
 export const PDFStudio: React.FC<PDFStudioProps> = ({
-  locale = 'en',
+  locale = 'zh',
   className = '',
   initialFile = null,
 }) => {
   const router = useRouter();
-  const validLocale = (locale as string) || 'en';
+  const validLocale = (locale as string) || 'zh';
   const isZh = validLocale.toLowerCase().startsWith('zh');
   const isMac = checkIsMac();
 

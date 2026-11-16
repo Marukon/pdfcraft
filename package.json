@@ -9,6 +9,7 @@
     "dev:tauri": "tauri dev",
     "build:tauri": "tauri build",
     "build": "next build",
+    "build:edgeone": "node scripts/build-edgeone.mjs",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run",

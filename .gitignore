@@ -18,6 +18,7 @@ out
 build
 !public/pdfjs-annotation-viewer/build
 dist
+/edgeone-dist/
 
 # Testing
 coverage

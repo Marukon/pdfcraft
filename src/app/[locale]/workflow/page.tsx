@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { locales, type Locale } from '@/lib/i18n/config';
+import { locales, defaultLocale, type Locale } from '@/lib/i18n/config';
 import { generateBaseMetadata } from '@/lib/seo';
 import WorkflowPageClient from './WorkflowPageClient';
 
@@ -14,7 +14,7 @@ interface WorkflowPageProps {
 
 export async function generateMetadata({ params }: WorkflowPageProps): Promise<Metadata> {
     const { locale } = await params;
-    const validLocale = locales.includes(locale as Locale) ? (locale as Locale) : 'en';
+    const validLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
     const t = await getTranslations({ locale: validLocale, namespace: 'common' });
 
     return generateBaseMetadata({

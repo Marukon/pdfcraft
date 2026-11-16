@@ -32,6 +32,8 @@
 
 ## 📖 About
 
+**中文站部署：**本版本仅保留简体中文。部署到 EdgeOne Pages 请使用 [EdgeOne Pages 部署说明](DEPLOYMENT.md#edgeone-pages-中文站)，直接上传 `edgeone-dist/`。
+
 **PDFCraft** is a comprehensive suite of PDF tools designed for privacy and performance. Unlike many online converters, PDFCraft processes your files entirely within your browser using WebAssembly technology. Your documents **never** leave your device, ensuring maximum security for your sensitive data.
 
 This project is built with modern web technologies to provide a slick, app-like experience directly in the browser.
@@ -42,7 +44,7 @@ This project is built with modern web technologies to provide a slick, app-like 
 - **🚀 Fast & Responsive**: Powered by Next.js and WebAssembly for near-native performance.
 - **🛠️ Comprehensive Toolset**: Over 80+ tools to handle any PDF task.
 - **🎨 Modern UI**: Clean, accessible, and responsive design built with Tailwind CSS.
-- **🌐 Multi-language**: Supports English, Spanish, French, German, Portuguese, Japanese, Korean, and Chinese.
+- **🌐 中文界面**：仅提供简体中文（`/zh/`）。
 
 ### Rotating PDFs
 
@@ -381,7 +383,7 @@ PDFCraft is configured for static export (`output: 'export'`), which means it ca
 
 ### Verify Deployment
 After deployment, please check the following features to ensure everything is working correctly:
-- Multi-language routing (e.g., `/en`, `/zh`)
+- Simplified Chinese routing (`/zh/`)
 - Tool page loading
 - WebAssembly (PDF processing) functionality
 

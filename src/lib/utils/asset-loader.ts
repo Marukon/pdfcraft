@@ -13,6 +13,7 @@ interface ChunkManifest {
     chunks: number;
     totalSize: number;
     chunkSize: number;
+    encoding?: 'gzip';
 }
 
 export interface FetchProgress {
@@ -118,7 +119,8 @@ async function fetchWithProgress(
  */
 export async function fetchAssembledBlob(
     url: string,
-    onProgress?: ProgressCallback
+    onProgress?: ProgressCallback,
+    requireManifest = false,
 ): Promise<Blob> {
     // 1. Check Cache Storage first
     const cached = await getCachedBlob(url);
@@ -134,16 +136,18 @@ export async function fetchAssembledBlob(
     
     let manifest: ChunkManifest | null = null;
     const isDev = process.env.NODE_ENV === 'development';
-    if (!isDev) {
+    if (!isDev || requireManifest) {
         try {
             const manifestRes = await fetch(manifestUrl);
             if (manifestRes.ok) {
                 manifest = await manifestRes.json();
             }
         } catch (err) {
+            if (requireManifest) throw err;
             console.debug(`[asset-loader] Manifest check skipped for ${url}:`, err);
         }
     }
+    if (requireManifest && !manifest) throw new Error(`Missing asset manifest: ${manifestUrl}`);
 
     let resultBlob: Blob;
 
@@ -187,7 +191,15 @@ export async function fetchAssembledBlob(
         else if (lowerUrl.includes('.otf')) mimeType = 'font/otf';
         else if (lowerUrl.includes('.woff2')) mimeType = 'font/woff2';
 
-        resultBlob = new Blob(chunks as unknown as BlobPart[], { type: mimeType });
+        const assembled = new Blob(chunks as unknown as BlobPart[]);
+        if (assembled.size !== manifest.totalSize) {
+            throw new Error(`Incomplete asset: ${url} (${assembled.size}/${manifest.totalSize} bytes)`);
+        }
+        resultBlob = manifest.encoding === 'gzip'
+            ? await new Response(assembled.stream().pipeThrough(new DecompressionStream('gzip')), {
+                headers: { 'Content-Type': mimeType },
+            }).blob()
+            : new Blob([assembled], { type: mimeType });
     } else {
         // Fallback: Fetch the file directly with progress
         const res = await fetch(url);

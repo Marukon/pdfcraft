@@ -9,46 +9,10 @@ import {
 } from '@/lib/pdf/errors';
 import { SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 
-// Import all locale message files
-import enMessages from '../../../messages/en.json';
-import jaMessages from '../../../messages/ja.json';
-import koMessages from '../../../messages/ko.json';
-import esMessages from '../../../messages/es.json';
-import frMessages from '../../../messages/fr.json';
-import deMessages from '../../../messages/de.json';
 import zhMessages from '../../../messages/zh.json';
-import zhTW_Messages from '../../../messages/zh-TW.json';
-import ptMessages from '../../../messages/pt.json';
-import arMessages from '../../../messages/ar.json';
-import heMessages from '../../../messages/he.json';
-import idMessages from '../../../messages/id.json';
-import itMessages from '../../../messages/it.json';
-import viMessages from '../../../messages/vi.json';
-import roMessages from '../../../messages/ro.json';
-import plMessages from '../../../messages/pl.json';
-import csMessages from '../../../messages/cs.json';
-import hiMessages from '../../../messages/hi.json';
 
-// Map of locale to messages
 const LOCALE_MESSAGES: Record<Locale, Record<string, unknown>> = {
-  en: enMessages,
-  ja: jaMessages,
-  ko: koMessages,
-  es: esMessages,
-  fr: frMessages,
-  de: deMessages,
   zh: zhMessages,
-  'zh-TW': zhTW_Messages,
-  pt: ptMessages,
-  ar: arMessages,
-  he: heMessages,
-  id: idMessages,
-  it: itMessages,
-  vi: viMessages,
-  ro: roMessages,
-  pl: plMessages,
-  cs: csMessages,
-  hi: hiMessages,
 };
 
 /**
@@ -188,11 +152,7 @@ describe('Error Message Mapping Property Tests', () => {
           // Message should not contain the raw error code format (SCREAMING_SNAKE_CASE)
           expect(errorMessage).not.toMatch(/^[A-Z_]+$/);
           
-          // Message should be a proper sentence (contains spaces or is localized)
-          // For non-English locales, we just check it's not empty
-          if (locale === 'en') {
-            expect(errorMessage).toMatch(/\s/); // Contains at least one space
-          }
+          expect(errorMessage).toMatch(/\p{Script=Han}/u);
           
           return true;
         }

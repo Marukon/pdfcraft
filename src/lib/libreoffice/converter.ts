@@ -32,6 +32,7 @@ import { withBasePath } from '../utils/path';
 import { isTauri } from '../tauri-bridge';
 
 const LIBREOFFICE_PATH = withBasePath('/libreoffice-wasm/');
+const EDGEONE_BUILD = process.env.NEXT_PUBLIC_EDGEONE_BUILD === '1';
 const ASSET_VERSION = '20240212-4';
 // Request uncompressed names. In production, nginx gzip_static serves the .gz variant
 // with correct Content-Encoding and MIME headers (required for WebAssembly streaming).
@@ -165,10 +166,12 @@ export class LibreOfficeConverter {
 
                 // Fetch and reassemble assets (handles chunking on Cloudflare Pages)
                 const [sofficeWasmBlob, sofficeDataBlob, fontBlob] = await Promise.all(
-                    filesToFetch.map(f => fetchAssembledBlob(f.url, (p) => {
-                        loadedBytesMap[f.name] = p.loadedBytes;
+                    filesToFetch.map((f, index) => fetchAssembledBlob(f.url, (p) => {
+                        loadedBytesMap[f.name] = EDGEONE_BUILD && p.totalBytes
+                            ? f.estSize * p.loadedBytes / p.totalBytes
+                            : p.loadedBytes;
                         reportProgress();
-                    }))
+                    }, EDGEONE_BUILD && index < 2))
                 );
 
                 sofficeWasmUrl = URL.createObjectURL(sofficeWasmBlob);
@@ -296,8 +299,7 @@ export class LibreOfficeConverter {
 
         // 3. Check file connectivity (parallel for speed) & accumulate total size
         const files = [
-            SOFFICE_WASM_FILE,
-            SOFFICE_DATA_FILE,
+            ...(EDGEONE_BUILD ? [] : [SOFFICE_WASM_FILE, SOFFICE_DATA_FILE]),
             'soffice.js',
             'soffice.worker.js',
             'browser.worker.global.js',
@@ -343,7 +345,7 @@ export class LibreOfficeConverter {
             }
         }));
 
-        this.totalAssetSizeMB = totalBytes / (1024 * 1024);
+        this.totalAssetSizeMB = EDGEONE_BUILD ? 0 : totalBytes / (1024 * 1024);
         if (this.totalAssetSizeMB > 0) {
             console.warn(`[LibreOffice] Total asset size: ${this.totalAssetSizeMB.toFixed(1)} MB`);
         }

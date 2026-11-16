@@ -7,7 +7,7 @@
 
 import type { Metadata } from 'next';
 import { siteConfig } from '@/config/site';
-import { type Locale, localeConfig, locales } from '@/lib/i18n/config';
+import { type Locale, defaultLocale, locales } from '@/lib/i18n/config';
 import type { Tool, ToolContent } from '@/types/tool';
 import { getBasePath } from '@/lib/utils/path';
 
@@ -59,8 +59,7 @@ export function getAlternateUrls(path: string = ''): Record<string, string> {
     alternates[locale] = `${siteConfig.url}${basePath}/${locale}${cleanPath}`;
   }
 
-  // Add x-default pointing to English
-  alternates['x-default'] = `${siteConfig.url}${basePath}/en${cleanPath}`;
+  alternates['x-default'] = getCanonicalUrl(defaultLocale, cleanPath);
 
   return alternates;
 }
@@ -253,28 +252,8 @@ export function generateContactMetadata(locale: Locale, translations?: { title: 
 /**
  * Convert locale to Open Graph locale format
  */
-export function getOpenGraphLocale(locale: Locale): string {
-  const ogLocaleMap: Record<Locale, string> = {
-    en: 'en_US',
-    ja: 'ja_JP',
-    ko: 'ko_KR',
-    es: 'es_ES',
-    fr: 'fr_FR',
-    de: 'de_DE',
-    zh: 'zh_CN',
-    'zh-TW': 'zh_TW',
-    pt: 'pt_BR',
-    ar: 'ar_AR',
-    he: 'he_IL',
-    it: 'it_IT',
-    id: 'id_ID',
-    vi: 'vi_VN',
-    ro: 'ro_RO',
-    pl: 'pl_PL',
-    cs: 'cs_CZ',
-    hi: 'hi_IN',
-  };
-  return ogLocaleMap[locale] || 'en_US';
+export function getOpenGraphLocale(_locale: Locale): string {
+  return 'zh_CN';
 }
 
 /**

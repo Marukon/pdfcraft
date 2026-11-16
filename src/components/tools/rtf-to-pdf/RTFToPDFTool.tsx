@@ -46,13 +46,13 @@ export function RTFToPDFTool({ className = '' }: RTFToPDFToolProps) {
 
                 setPreloadStatus('processing');
                 setPreloadProgress(0);
-                setPreloadMessage('Checking environment...');
+                setPreloadMessage(t('conversionEngine.checking'));
 
                 await converter.initialize((loadProgress: { percent: number; message: string; phase?: string }) => {
                     if (cancelled) return;
                     setPreloadStatus('processing');
                     setPreloadProgress(loadProgress.percent);
-                    setPreloadMessage(loadProgress.message || 'Loading conversion engine...');
+                    setPreloadMessage(t('conversionEngine.loading'));
 
                     if (loadProgress.phase === 'ready' || loadProgress.percent >= 100) {
                         setPreloadStatus('complete');
@@ -62,15 +62,15 @@ export function RTFToPDFTool({ className = '' }: RTFToPDFToolProps) {
                 if (cancelled) return;
                 setPreloadStatus('complete');
                 setPreloadProgress(100);
-                setPreloadMessage('Conversion engine ready!');
+                setPreloadMessage(t('conversionEngine.ready'));
             } catch (err) {
                 if (cancelled) return;
                 setPreloadStatus('error');
-                setPreloadMessage(err instanceof Error ? err.message : 'Failed to preload conversion engine.');
+                setPreloadMessage(err instanceof Error ? err.message : t('conversionEngine.failed'));
             }
         })();
         return () => { cancelled = true; };
-    }, []);
+    }, [t]);
 
     const handleFilesSelected = useCallback((newFiles: File[]) => {
         if (newFiles.length > 0) {

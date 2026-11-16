@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { setRequestLocale } from 'next-intl/server';
-import { locales, type Locale } from '@/lib/i18n/config';
+import { locales, defaultLocale, type Locale } from '@/lib/i18n/config';
 import { generateBaseMetadata } from '@/lib/seo';
 import StudioPageClient from './StudioPageClient';
 
@@ -14,8 +14,8 @@ interface StudioPageProps {
 
 export async function generateMetadata({ params }: StudioPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const validLocale = locales.includes(locale as Locale) ? (locale as Locale) : 'en';
-  const isZh = validLocale === 'zh';
+  const validLocale = locales.includes(locale as Locale) ? (locale as Locale) : defaultLocale;
+  const isZh = validLocale.startsWith('zh');
 
   return generateBaseMetadata({
     locale: validLocale,

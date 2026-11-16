@@ -190,7 +190,7 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
                 }`}
               >
                 <span>✦</span>
-                <span>{locale === 'zh' ? '直接编辑正文与图片' : 'Direct Content Edit'}</span>
+                <span>{locale.startsWith('zh') ? '直接编辑正文与图片' : 'Direct Content Edit'}</span>
               </button>
               <button
                 type="button"
@@ -202,7 +202,7 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
                 }`}
               >
                 <span>✎</span>
-                <span>{locale === 'zh' ? '经典批注与涂鸦' : 'Classic Annotator'}</span>
+                <span>{locale.startsWith('zh') ? '经典批注与涂鸦' : 'Classic Annotator'}</span>
               </button>
             </div>
           </div>
@@ -260,7 +260,7 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
                   }`}
                 >
                   <span>✦</span>
-                  <span>{locale === 'zh' ? '直接编辑正文与图片' : 'Direct Content Edit'}</span>
+                  <span>{locale.startsWith('zh') ? '直接编辑正文与图片' : 'Direct Content Edit'}</span>
                 </button>
                 <button
                   type="button"
@@ -272,7 +272,7 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
                   }`}
                 >
                   <span>✎</span>
-                  <span>{locale === 'zh' ? '经典批注与涂鸦' : 'Classic Annotator'}</span>
+                  <span>{locale.startsWith('zh') ? '经典批注与涂鸦' : 'Classic Annotator'}</span>
                 </button>
               </div>
 
@@ -293,7 +293,7 @@ export function EditPDFTool({ className = '' }: EditPDFToolProps) {
             <div className="relative border border-[hsl(var(--color-border))] rounded-2xl overflow-hidden bg-[hsl(var(--color-card))] shadow-sm">
               <iframe
                 ref={iframeRef}
-                src={`/direct-pdf-editor/index.html?lang=${encodeURIComponent(locale || 'en')}`}
+                src={`/direct-pdf-editor/index.html?lang=${encodeURIComponent(locale || 'zh')}`}
                 className="w-full h-[820px] border-0"
                 title="PDF Editor"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"

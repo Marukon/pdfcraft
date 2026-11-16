@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import React from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/zh.json';
 import { RotatePDFTool } from '@/components/tools/rotate/RotatePDFTool';
 
 vi.mock('@/components/tools/FileUploader', () => ({
@@ -40,7 +40,7 @@ vi.mock('pdfjs-dist', () => ({
 
 const renderRotatePDFTool = () => {
   return render(
-    <NextIntlClientProvider locale="en" messages={messages}>
+    <NextIntlClientProvider locale="zh" messages={messages}>
       <RotatePDFTool />
     </NextIntlClientProvider>
   );
@@ -65,7 +65,7 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
 
     // Wait for previews to load (4 pages)
     await screen.findByText(/sample\.pdf/i);
-    await screen.findByText(/Selected 4 \/ 4 page\(s\)/i);
+    await screen.findByText(/已选中 4 \/ 4 页/i);
 
     // Click Clear button to deselect all pages
     const clearBtn = screen.getByRole('button', { name: messages.common.buttons.clear });
@@ -73,7 +73,7 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
 
     // Verify selection is cleared
     await waitFor(() => {
-      expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
     });
 
     // Trigger Ctrl+A
@@ -87,7 +87,7 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
 
     // Verify all 4 pages are re-selected
     await waitFor(() => {
-      expect(screen.getByText(/Selected 4 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 4 \/ 4 页/i)).toBeInTheDocument();
     });
   });
 
@@ -95,13 +95,13 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
     renderRotatePDFTool();
 
     fireEvent.click(screen.getByTestId('mock-uploader'));
-    await screen.findByText(/Selected 4 \/ 4 page\(s\)/i);
+    await screen.findByText(/已选中 4 \/ 4 页/i);
 
     // Clear selection
     const clearBtn = screen.getByRole('button', { name: messages.common.buttons.clear });
     fireEvent.click(clearBtn);
     await waitFor(() => {
-      expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
     });
 
     // Trigger Cmd+A (metaKey)
@@ -114,7 +114,7 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
     window.dispatchEvent(event);
 
     await waitFor(() => {
-      expect(screen.getByText(/Selected 4 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 4 \/ 4 页/i)).toBeInTheDocument();
     });
   });
 
@@ -131,20 +131,20 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
     });
     window.dispatchEvent(event);
 
-    expect(screen.queryByText(/page\(s\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/已选中/)).not.toBeInTheDocument();
   });
 
   it('does NOT select all pages when custom page input is focused', async () => {
     renderRotatePDFTool();
 
     fireEvent.click(screen.getByTestId('mock-uploader'));
-    await screen.findByText(/Selected 4 \/ 4 page\(s\)/i);
+    await screen.findByText(/已选中 4 \/ 4 页/i);
 
     // Clear selection
     const clearBtn = screen.getByRole('button', { name: messages.common.buttons.clear });
     fireEvent.click(clearBtn);
     await waitFor(() => {
-      expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
     });
 
     const input = screen.getByPlaceholderText(/e\.g\. 1, 3-5/i);
@@ -159,20 +159,20 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
     input.dispatchEvent(event);
 
     // Selection should remain 0
-    expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
   });
 
   it('does NOT trigger when altKey is pressed (Ctrl+Alt+A)', async () => {
     renderRotatePDFTool();
 
     fireEvent.click(screen.getByTestId('mock-uploader'));
-    await screen.findByText(/Selected 4 \/ 4 page\(s\)/i);
+    await screen.findByText(/已选中 4 \/ 4 页/i);
 
     // Clear selection
     const clearBtn = screen.getByRole('button', { name: messages.common.buttons.clear });
     fireEvent.click(clearBtn);
     await waitFor(() => {
-      expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
     });
 
     const event = new KeyboardEvent('keydown', {
@@ -185,6 +185,6 @@ describe('RotatePDFTool - Select All Shortcut (Issue #176)', () => {
     window.dispatchEvent(event);
 
     // Selection should remain 0
-    expect(screen.getByText(/Selected 0 \/ 4 page\(s\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/已选中 0 \/ 4 页/i)).toBeInTheDocument();
   });
 });

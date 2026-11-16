@@ -3,10 +3,6 @@ import * as fc from 'fast-check';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { locales, type Locale } from '@/lib/i18n/config';
-import { 
-  saveLanguagePreference, 
-  getLanguagePreference 
-} from '@/components/layout/LanguageSelector';
 
 // Mock next-intl
 vi.mock('next-intl', () => ({
@@ -131,101 +127,4 @@ describe('Layout Property Tests', () => {
     });
   });
 
-  /**
-   * **Feature: nextjs-pdf-toolkit, Property 4: Language Preference Persistence (Round-Trip)**
-   * **Validates: Requirements 3.2**
-   * 
-   * For any supported locale, setting the language preference and then 
-   * retrieving it SHALL return the same locale value.
-   */
-  describe('Property 4: Language Preference Persistence (Round-Trip)', () => {
-    it('saving and retrieving language preference returns the same locale', () => {
-      fc.assert(
-        fc.property(
-          fc.constantFrom(...locales),
-          (locale) => {
-            // Save the language preference
-            saveLanguagePreference(locale);
-            
-            // Retrieve the language preference
-            const retrieved = getLanguagePreference();
-            
-            // Should be the same
-            expect(retrieved).toBe(locale);
-            
-            return true;
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    it('language preference persists across multiple saves', () => {
-      fc.assert(
-        fc.property(
-          fc.array(fc.constantFrom(...locales), { minLength: 2, maxLength: 10 }),
-          (localeSequence) => {
-            // Save each locale in sequence
-            for (const locale of localeSequence) {
-              saveLanguagePreference(locale);
-            }
-            
-            // The last saved locale should be retrieved
-            const lastLocale = localeSequence[localeSequence.length - 1];
-            const retrieved = getLanguagePreference();
-            
-            expect(retrieved).toBe(lastLocale);
-            
-            return true;
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    it('getLanguagePreference returns null when no preference is set', () => {
-      // Ensure localStorage is clear
-      localStorage.clear();
-      
-      const retrieved = getLanguagePreference();
-      expect(retrieved).toBeNull();
-    });
-
-    it('getLanguagePreference returns null for invalid stored values', () => {
-      fc.assert(
-        fc.property(
-          // Generate strings that are NOT valid locales
-          fc.string({ minLength: 1, maxLength: 10 })
-            .filter(s => !locales.includes(s as Locale)),
-          (invalidLocale) => {
-            // Manually set an invalid value in localStorage
-            localStorage.setItem('pdfcraft-language-preference', invalidLocale);
-            
-            // Should return null for invalid values
-            const retrieved = getLanguagePreference();
-            expect(retrieved).toBeNull();
-            
-            return true;
-          }
-        ),
-        { numRuns: 100 }
-      );
-    });
-
-    it('round-trip preserves locale for all supported locales', () => {
-      // Test each locale explicitly
-      for (const locale of locales) {
-        localStorage.clear();
-        
-        // Save
-        saveLanguagePreference(locale);
-        
-        // Retrieve
-        const retrieved = getLanguagePreference();
-        
-        // Verify round-trip
-        expect(retrieved).toBe(locale);
-      }
-    });
-  });
 });

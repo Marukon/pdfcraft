@@ -8,9 +8,9 @@ This project is configured for static export, making it deployable to any static
 
 **连接 Git 仓库：**项目类型选「其他 / 静态站点」，根目录选仓库根目录。项目附带的 `edgeone.json` 指定安装命令 `npm ci --ignore-scripts`、构建命令 `npm run build:edgeone` 和输出目录 `edgeone-dist`。本地重建可执行同样的两条命令，建议用 Node.js 22 或更新的 LTS。
 
-构建只导出简体中文页面，并省去源映射。Office 转换引擎按 20 MB 分片，浏览器下载后本地解压；OCR 识别语种和 PDF 字体资源保持不变。发布目录中的文件逐一检查，超过 25,000,000 字节或总数超过 20,000 时构建失败。请上传 `edgeone-dist/`，不要上传中间目录 `out/`、源码目录或依赖目录。
+构建只导出简体中文页面，并省去源映射。Office 转换引擎按 20 MB 分片，浏览器下载后本地解压；OCR 识别语种和 PDF 字体资源保持不变。输出文件超过 25,000,000 字节或总数超过 20,000 时构建失败。直接上传请使用 `edgeone-dist/`。
 
-如果构建日志出现 `@edgeone/opennextjs-pages` 或执行的仍是 `npm run build`，将项目框架设为「其他 / 静态站点」，并核对上面的命令和输出目录。EdgeOne 专用构建关闭 Webpack 磁盘缓存、限制并行度，打包时复用静态文件来降低构建空间占用。
+EdgeOne 的 Next 适配器有时会读取 `out/`。专用构建在校验通过后同步生成 `edgeone-dist/` 和 `out/`，两者包含相同的发布文件；无需手动清理。若日志显示执行的仍是 `npm run build`，请核对上面的构建命令。专用构建关闭 Webpack 磁盘缓存并限制并行度。
 
 ## 📦 Build Output
 

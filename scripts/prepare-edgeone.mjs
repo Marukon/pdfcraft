@@ -17,23 +17,25 @@ function makeCompressedParts(from, to, filename) {
   }));
 }
 
-const [, , from = 'out', to = 'edgeone-dist'] = process.argv;
+const [, , from = 'out', to = 'edgeone-dist', mirror] = process.argv;
 // Both build directories share one filesystem. Hard links avoid storing a
 // second copy of ordinary assets in EdgeOne's build workspace.
-function stageAssets(source, destination) {
+function stageAssets(source, destination, include) {
   mkdirSync(destination);
   for (const entry of readdirSync(source, { withFileTypes: true })) {
     const path = join(source, entry.name);
-    const name = relative(from, path).split(sep).join('/');
-    if (name.endsWith('.map') || name === '.htaccess' || name === '_headers'
-      || engines.some((engine) => name.startsWith(`libreoffice-wasm/${engine}`))) continue;
+    if (!include(path)) continue;
     const target = join(destination, entry.name);
-    if (entry.isDirectory()) stageAssets(path, target);
+    if (entry.isDirectory()) stageAssets(path, target, include);
     else if (entry.isFile()) linkSync(path, target);
     else throw new Error(`Unsupported deployment entry: ${path}`);
   }
 }
-stageAssets(from, to);
+stageAssets(from, to, (path) => {
+  const name = relative(from, path).split(sep).join('/');
+  return !name.endsWith('.map') && name !== '.htaccess' && name !== '_headers'
+    && !engines.some((engine) => name.startsWith(`libreoffice-wasm/${engine}`));
+});
 for (const filename of engines) makeCompressedParts(from, join(to, 'libreoffice-wasm'), filename);
 const { headers, redirects, rewrites } = JSON.parse(readFileSync('edgeone.json', 'utf8'));
 writeFileSync(join(to, 'edgeone.json'), JSON.stringify({ headers, redirects, rewrites }, null, 2));
@@ -66,4 +68,5 @@ for (const entry of ['index.html', 'zh/index.html']) {
 }
 measure(to);
 if (count > MAX_FILES) throw new Error(`${count} files (limit: ${MAX_FILES})`);
+if (mirror) stageAssets(to, mirror, () => true);
 console.log(`[EdgeOne] ${count}/${MAX_FILES} files; largest: ${largestPath} (${largestBytes}/${MAX_FILE_BYTES} bytes); total: ${totalBytes} bytes.`);
